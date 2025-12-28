@@ -450,7 +450,7 @@ const AuraFlowLanding = () => {
 
             {/* Floating Language Cards */}
             <div 
-              className="absolute -left-10 top-0 z-20 float-slow w-48 hidden md:block transition-transform duration-150 ease-out"
+              className="absolute -left-20 top-0 z-20 float-slow w-48 hidden md:block transition-transform duration-150 ease-out"
               style={{ transform: `rotateX(${heroScroll.rotateX * 0.7 + iphoneRotate.x * 0.7}deg) rotateY(${heroScroll.rotateY * 0.7 + iphoneRotate.y * 0.7}deg)` }}
             >
               <div className="glass-panel p-2 rounded-3xl shadow-2xl rotate-[-10deg]">
