@@ -1,8 +1,23 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import SplashSVG from './splash';
 
 const AuraFlowLanding = () => {
   const soundWaveRef = useRef(null);
+  const iphoneRef = useRef(null);
+  const studioRef = useRef(null);
+  const heroRef = useRef(null);
+  const multiplatformRef = useRef(null);
+  const cardsRef = useRef(null);
+  const bentoRef = useRef(null);
+  const whoRef = useRef(null);
+  const [iphoneRotate, setIphoneRotate] = useState({ x: 0, y: 0 });
+  const [heroScroll, setHeroScroll] = useState({ rotateX: 0, rotateY: 0, scale: 1 });
+  const [studioScroll, setStudioScroll] = useState({ rotateX: 20, rotateY: -15, scale: 0.75 });
+  const [multiplatformScroll, setMultiplatformScroll] = useState({ rotateX: 20, rotateY: 15, scale: 0.8 });
+  const [cardsScroll, setCardsScroll] = useState({ rotateX: 18, rotateY: -12, scale: 0.85 });
+  const [bentoScroll, setBentoScroll] = useState({ rotateX: 15, rotateY: 10, scale: 0.85 });
+  const [whoScroll, setWhoScroll] = useState({ rotateX: 20, rotateY: -15, scale: 0.8 });
 
   useEffect(() => {
     // Intersection Observer for scroll animations
@@ -30,9 +45,81 @@ const AuraFlowLanding = () => {
       }
     }, 300);
 
+    // 3D iPhone rotation on mouse move
+    const handleMouseMove = (e) => {
+      if (!heroRef.current) return;
+      const rect = heroRef.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+      const rotateY = ((e.clientX - centerX) / rect.width) * 20;
+      const rotateX = ((centerY - e.clientY) / rect.height) * 15;
+      setIphoneRotate({ x: rotateX, y: rotateY });
+    };
+
+    const handleMouseLeave = () => {
+      setIphoneRotate({ x: 0, y: 0 });
+    };
+
+    const heroEl = heroRef.current;
+    if (heroEl) {
+      heroEl.addEventListener('mousemove', handleMouseMove);
+      heroEl.addEventListener('mouseleave', handleMouseLeave);
+    }
+
+    // 3D scroll morphing for all sections
+    const handleScroll = () => {
+      const windowHeight = window.innerHeight;
+      const viewportCenter = windowHeight / 2;
+      
+      // Helper function to calculate 3D transforms
+      const calc3D = (ref, maxRotateX = 20, maxRotateY = 15, minScale = 0.8) => {
+        if (!ref.current) return null;
+        const rect = ref.current.getBoundingClientRect();
+        const center = rect.top + rect.height / 2;
+        const distance = Math.abs(center - viewportCenter) / windowHeight;
+        return {
+          rotateX: distance * maxRotateX,
+          rotateY: (center > viewportCenter ? -1 : 1) * distance * maxRotateY,
+          scale: Math.max(minScale, 1 - distance * (1 - minScale))
+        };
+      };
+      
+      // Hero section
+      const hero = calc3D(heroRef, 15, 12, 0.85);
+      if (hero) setHeroScroll(hero);
+      
+      // Studio section
+      const studio = calc3D(studioRef, 20, 15, 0.75);
+      if (studio) setStudioScroll(studio);
+      
+      // Multiplatform section
+      const multi = calc3D(multiplatformRef, 18, 12, 0.85);
+      if (multi) setMultiplatformScroll(multi);
+      
+      // Cards section
+      const cards = calc3D(cardsRef, 15, 10, 0.88);
+      if (cards) setCardsScroll(cards);
+      
+      // Bento section
+      const bento = calc3D(bentoRef, 12, 8, 0.9);
+      if (bento) setBentoScroll(bento);
+      
+      // Who section
+      const who = calc3D(whoRef, 18, 14, 0.82);
+      if (who) setWhoScroll(who);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial call
+
     return () => {
       observer.disconnect();
       clearInterval(interval);
+      window.removeEventListener('scroll', handleScroll);
+      if (heroEl) {
+        heroEl.removeEventListener('mousemove', handleMouseMove);
+        heroEl.removeEventListener('mouseleave', handleMouseLeave);
+      }
     };
   }, []);
 
@@ -235,10 +322,11 @@ const AuraFlowLanding = () => {
       {/* Navbar */}
       <nav className="fixed top-0 left-0 right-0 z-[100] p-6 pointer-events-none">
         <div className="max-w-7xl mx-auto flex items-center justify-between pointer-events-auto">
-          <Link to="/" className="btn-shimmer shake-on-hover relative px-6 py-3 bg-slate-900 rounded-full flex items-center gap-3 transition-all duration-500 shadow-xl shadow-slate-400/20 overflow-hidden">
-          
-            <span className="text-xl font-extrabold tracking-tighter text-white relative z-10">Aura Flow</span>
-          </Link>
+          <div className="glass-panel px-1.5 py-1.5 rounded-full transition-all duration-1000 opacity-100 translate-y-0">
+            <Link to="/" className="btn-shimmer shake-on-hover relative px-6 py-2.5 bg-slate-900 rounded-full flex items-center gap-3 transition-all duration-500 shadow-xl shadow-slate-200 overflow-hidden">
+              <span className="text-xl font-extrabold tracking-tighter text-white relative z-10">Aura Flow</span>
+            </Link>
+          </div>
           
           <div className="hidden lg:flex items-center gap-1 glass-panel px-2 py-1.5 rounded-full transition-all duration-1000 opacity-100 translate-y-0">
             <a href="#how" className="px-5 py-2 text-sm font-semibold text-slate-600 hover:text-indigo-600 transition-colors">How it works</a>
@@ -255,7 +343,7 @@ const AuraFlowLanding = () => {
       </nav>
 
       {/* Hero Section */}
-      <section className="relative min-h-screen pt-24 pb-12 overflow-hidden flex flex-col items-center">
+      <section className="relative min-h-screen pt-32 pb-12 overflow-hidden flex flex-col items-center">
         {/* Animated Background Blobs */}
         <div className="blob-bg top-0 -left-20 bg-indigo-200"></div>
         <div className="blob-bg bottom-0 -right-20 bg-cyan-100" style={{ animationDelay: '-10s' }}></div>
@@ -297,25 +385,75 @@ const AuraFlowLanding = () => {
           </div>
 
           {/* Right Visual Scene */}
-          <div className="lg:col-span-6 relative [perspective:2000px] h-[600px] flex items-center justify-center">
-            {/* Main Image Card */}
-            <div className="relative z-30 transition-all duration-1000 opacity-100 translate-y-0 w-full max-w-[320px] [transform:rotateY(-15deg)_rotateX(10deg)] hover:[transform:rotateY(0deg)_rotateX(0deg)_scale(1.05)]">
-              <div className="gradient-border shadow-2xl">
-                <div className="rounded-[1.9rem] overflow-hidden aspect-[9/16] relative bg-slate-100">
-                  <img src="/user.png" alt="Main Creator" className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-10 left-0 right-0 px-6 text-center">
-                    <div className="glass-panel py-3 px-4 rounded-xl inline-block animate-on-scroll opacity-0 translate-y-10">
-                      <p className="text-sm font-bold text-slate-900">Hello, I'm reaching you globally!</p>
+          <div 
+            ref={heroRef}
+            className="lg:col-span-6 relative h-[600px] flex items-center justify-center overflow-visible cursor-pointer transition-transform duration-500 ease-out"
+            style={{ perspective: '1200px', transform: `scale(${heroScroll.scale})` }}
+          >
+            
+            {/* Splash SVG Background with Gradient */}
+            <svg width="0" height="0" className="absolute">
+              <defs>
+                <linearGradient id="splashGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#f472b6" />
+                  <stop offset="25%" stopColor="#e879f9" />
+                  <stop offset="50%" stopColor="#a78bfa" />
+                  <stop offset="75%" stopColor="#818cf8" />
+                  <stop offset="100%" stopColor="#60a5fa" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <SplashSVG 
+              className="absolute scale-[1.3] -translate-y-[50px] opacity-100 transition-transform duration-150 ease-out pointer-events-none" 
+              fill="url(#splashGradient)" 
+              style={{ transform: `rotateX(${heroScroll.rotateX + iphoneRotate.x * 0.5}deg) rotateY(${heroScroll.rotateY + iphoneRotate.y * 0.5}deg)` }}
+            />
+
+            {/* Main Image Card - iPhone Frame */}
+            <div 
+              ref={iphoneRef}
+              className="relative z-30 transition-transform duration-150 ease-out opacity-100 -translate-y-8 w-full max-w-[260px] group"
+              style={{ transform: `rotateX(${heroScroll.rotateX + iphoneRotate.x}deg) rotateY(${heroScroll.rotateY + iphoneRotate.y}deg)` }}
+            >
+              {/* iPhone Frame */}
+              <div className="relative bg-slate-900 rounded-[2.5rem] p-[8px] shadow-2xl shadow-slate-900/50">
+                {/* iPhone Side Buttons */}
+                <div className="absolute -left-[3px] top-20 w-[3px] h-6 bg-slate-700 rounded-l-sm"></div>
+                <div className="absolute -left-[3px] top-28 w-[3px] h-10 bg-slate-700 rounded-l-sm"></div>
+                <div className="absolute -left-[3px] top-40 w-[3px] h-10 bg-slate-700 rounded-l-sm"></div>
+                <div className="absolute -right-[3px] top-28 w-[3px] h-14 bg-slate-700 rounded-r-sm"></div>
+                
+                {/* iPhone Screen */}
+                <div className="relative rounded-[2rem] overflow-hidden aspect-[9/19.5] bg-black">
+                  {/* Dynamic Island */}
+                  <div className="absolute top-3 left-1/2 -translate-x-1/2 z-50 bg-black w-[100px] h-[28px] rounded-full flex items-center justify-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-slate-800"></div>
+                    <div className="w-3 h-3 rounded-full bg-slate-800 ring-1 ring-slate-700"></div>
+                  </div>
+                  
+                  {/* Screen Content */}
+                  <div className="relative w-full h-full">
+                    <img src="/user.png" alt="Main Creator" className="w-full h-full object-cover object-top scale-105" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                    <div className="absolute bottom-12 left-0 right-0 px-4 text-center">
+                      <div className="glass-panel py-3 px-4 rounded-xl inline-block animate-on-scroll opacity-0 translate-y-10 group-hover:bg-white transition-all">
+                        <p className="text-sm font-bold text-slate-900">Hello, I'm reaching you globally!</p>
+                      </div>
                     </div>
+                    
+                    {/* iPhone Home Indicator */}
+                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[120px] h-[4px] bg-white/80 rounded-full"></div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Floating Language Cards */}
-            <div className="absolute -left-10 top-0 z-20 float-slow w-48 hidden md:block">
-              <div className="glass-panel p-2 rounded-3xl shadow-2xl rotate-[-10deg] animate-on-scroll opacity-100 translate-y-0">
+            <div 
+              className="absolute -left-10 top-0 z-20 float-slow w-48 hidden md:block transition-transform duration-150 ease-out"
+              style={{ transform: `rotateX(${heroScroll.rotateX * 0.7 + iphoneRotate.x * 0.7}deg) rotateY(${heroScroll.rotateY * 0.7 + iphoneRotate.y * 0.7}deg)` }}
+            >
+              <div className="glass-panel p-2 rounded-3xl shadow-2xl rotate-[-10deg]">
                 <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400&auto=format&fit=crop" alt="Spanish Version" className="w-full aspect-square rounded-2xl object-cover mb-3" />
                 <div className="flex items-center gap-2 px-2 pb-1">
                   <span className="text-lg">🇪🇸</span>
@@ -324,33 +462,17 @@ const AuraFlowLanding = () => {
               </div>
             </div>
 
-            <div className="absolute -right-16 bottom-10 z-20 float-delayed w-48 hidden md:block">
-              <div className="glass-panel p-2 rounded-3xl shadow-2xl rotate-[8deg] animate-on-scroll opacity-0 translate-y-10">
+            <div 
+              className="absolute -right-16 bottom-10 z-20 float-delayed w-48 hidden md:block transition-transform duration-150 ease-out"
+              style={{ transform: `rotateX(${heroScroll.rotateX * 0.7 + iphoneRotate.x * 0.7}deg) rotateY(${heroScroll.rotateY * 0.7 + iphoneRotate.y * 0.7}deg)` }}
+            >
+              <div className="glass-panel p-2 rounded-3xl shadow-2xl rotate-[8deg]">
                 <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=400&auto=format&fit=crop" alt="Japanese Version" className="w-full aspect-square rounded-2xl object-cover mb-3" />
                 <div className="flex items-center gap-2 px-2 pb-1">
                   <span className="text-lg">🇯🇵</span>
                   <span className="text-xs font-bold text-slate-800 tracking-tight">こんにちは、世界</span>
                 </div>
               </div>
-            </div>
-
-            {/* Audio Wave Widget */}
-            <div className="absolute top-1/4 -right-10 z-40 float-fast glass-panel p-6 rounded-[2rem] shadow-xl border-l-4 border-indigo-500 animate-on-scroll opacity-100 translate-y-0">
-              <div className="flex items-center gap-4">
-                <div ref={soundWaveRef} className="flex items-end gap-[2px] h-[60px]">
-                  {[...Array(5)].map((_, i) => (
-                    <div key={i} className="wave-bar w-[3px] bg-gradient-to-t from-indigo-600 to-cyan-500 rounded-full transition-all duration-300" style={{ height: '20px' }} />
-                  ))}
-                </div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Voice Match</p>
-                  <p className="text-sm font-bold text-slate-800">Perfect Sync</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute -z-10 w-[500px] h-[500px] border-2 border-indigo-50 rounded-full flex items-center justify-center">
-              <div className="w-[400px] h-[400px] border border-indigo-100/50 rounded-full animate-pulse"></div>
             </div>
           </div>
         </div>
@@ -366,26 +488,39 @@ const AuraFlowLanding = () => {
             <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">Upload once, generate multiple audio tracks in different languages with your exact voice signature.</p>
           </div>
 
-          <div className="relative max-w-5xl mx-auto h-[650px] perspective-container">
+          <div 
+            ref={studioRef}
+            className="relative max-w-5xl mx-auto h-[650px] transition-transform duration-300 ease-out"
+            style={{ perspective: '2000px', transformStyle: 'preserve-3d' }}
+          >
             {/* Main Mockup */}
-            <div className="absolute inset-0 flex items-center justify-center z-20 tilt-card">
+            <div 
+              className="absolute inset-0 flex items-center justify-center z-20 transition-transform duration-500 ease-out"
+              style={{ transform: `rotateX(${studioScroll.rotateX}deg) rotateY(${studioScroll.rotateY}deg) scale(${studioScroll.scale})`, transformStyle: 'preserve-3d' }}
+            >
               <div className="w-full max-w-2xl rounded-[3rem] overflow-hidden glass p-4 shadow-2xl shadow-indigo-100/50 border-white transition-all duration-1000 animate-on-scroll opacity-0 translate-y-12">
-                <img src="/barrier.png" alt="AI Dubbing Dashboard" className="rounded-[2rem] w-full shadow-inner" />
+                <img src="/barrier.png" alt="AI Dubbing Dashboard" className="rounded-[2rem] w-full shadow-inner object-cover object-top scale-120" />
               </div>
             </div>
 
             {/* Floating Audio Track Cards */}
-            <div className="absolute -left-10 top-0 z-30 float-1 hidden lg:block">
+            <div 
+              className="absolute -left-10 top-0 z-30 float-1 hidden lg:block transition-transform duration-500 ease-out"
+              style={{ transform: `rotateX(${studioScroll.rotateX * 0.7}deg) rotateY(${studioScroll.rotateY * 0.7}deg) translateZ(80px) scale(${studioScroll.scale})`, transformStyle: 'preserve-3d' }}
+            >
               <div className="glass p-3 rounded-[2rem] shadow-2xl w-48 border-l-4 border-indigo-400 animate-on-scroll opacity-0 translate-y-12">
-                <img src="/clar.png" alt="Original" className="rounded-2xl w-full mb-3" />
+                <img src="/clar.png" alt="Original" className="rounded-2xl w-full mb-3 object-cover object-top scale-105" />
                 <div className="flex items-center gap-2 px-2">
-                  <span className="text-xl">�🇷</span>
+                  <span className="text-xl">🇫🇷</span>
                   <span className="text-xs font-bold text-slate-800">Bonjour le monde!</span>
                 </div>
               </div>
             </div>
 
-            <div className="absolute -right-12 top-1/4 z-30 float-2 hidden lg:block">
+            <div 
+              className="absolute -right-12 top-1/4 z-30 float-2 hidden lg:block transition-transform duration-500 ease-out"
+              style={{ transform: `rotateX(${studioScroll.rotateX * 0.7}deg) rotateY(${studioScroll.rotateY * 0.7}deg) translateZ(60px) scale(${studioScroll.scale})`, transformStyle: 'preserve-3d' }}
+            >
               <div className="glass p-3 rounded-[2rem] shadow-2xl w-48 border-l-4 border-cyan-400 animate-on-scroll opacity-0 translate-y-12">
                 <img src="/pep.png" alt="Portuguese" className="rounded-2xl w-full mb-3" />
                 <div className="flex items-center gap-2 px-2">
@@ -395,7 +530,10 @@ const AuraFlowLanding = () => {
               </div>
             </div>
 
-            <div className="absolute left-1/4 -bottom-10 z-40 float-3 hidden lg:block">
+            <div 
+              className="absolute left-1/4 -bottom-10 z-40 float-3 hidden lg:block transition-transform duration-500 ease-out"
+              style={{ transform: `rotateX(${studioScroll.rotateX * 0.5}deg) rotateY(${studioScroll.rotateY * 0.5}deg) translateZ(100px) scale(${studioScroll.scale})`, transformStyle: 'preserve-3d' }}
+            >
               <div className="glass p-4 rounded-3xl shadow-xl flex items-center gap-4 animate-on-scroll opacity-0 translate-y-12">
                 <div className="wave-container">
                   <div className="wave-bar bg-gradient-to-t from-indigo-600 to-cyan-500 rounded-full w-[3px]" style={{ animationDelay: '0.1s', height: '26px' }}></div>
@@ -450,9 +588,13 @@ const AuraFlowLanding = () => {
               </div>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-6 relative">
-            <div className="space-y-6 pt-12">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform -rotate-3 hover:rotate-0 transition-all">
+          <div 
+            ref={multiplatformRef}
+            className="grid grid-cols-2 gap-6 relative transition-transform duration-500 ease-out"
+            style={{ perspective: '2000px', transform: `perspective(2000px) rotateX(${multiplatformScroll.rotateX}deg) rotateY(${multiplatformScroll.rotateY}deg) scale(${multiplatformScroll.scale})`, transformStyle: 'preserve-3d' }}
+          >
+            <div className="space-y-6 pt-12" style={{ transform: 'translateZ(30px)', transformStyle: 'preserve-3d' }}>
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform -rotate-3 hover:rotate-0 transition-all" style={{ transform: 'translateZ(20px)' }}>
                 <img src="/inst.png" alt="Creator 1" className="w-full h-72 object-cover" />
                 <div className="absolute top-4 left-4 glass px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
                  <span className="text-slate-500">JP</span>
@@ -467,8 +609,8 @@ const AuraFlowLanding = () => {
                 </div>
               </div>
             </div>
-            <div className="space-y-6">
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform rotate-6 hover:rotate-0 transition-all">
+            <div className="space-y-6" style={{ transform: 'translateZ(50px)', transformStyle: 'preserve-3d' }}>
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl transform rotate-6 hover:rotate-0 transition-all" style={{ transform: 'translateZ(25px)' }}>
                 <img src="/french.png" alt="Creator 3" className="w-full h-72 object-cover" />
                 <div className="absolute top-4 left-4 glass px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-1.5">
                   <span className="text-slate-500">FR</span>
@@ -495,8 +637,12 @@ const AuraFlowLanding = () => {
             <p className="text-lg text-slate-500 font-medium">Capture once. Publish in forty languages.</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-10">
-            <div className="group relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-4">
+          <div 
+            ref={cardsRef}
+            className="grid md:grid-cols-3 gap-10 transition-transform duration-500 ease-out"
+            style={{ perspective: '2000px', transform: `perspective(2000px) rotateX(${cardsScroll.rotateX}deg) rotateY(${cardsScroll.rotateY}deg) scale(${cardsScroll.scale})`, transformStyle: 'preserve-3d' }}
+          >
+            <div className="group relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-4" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
               <img src="https://images.unsplash.com/photo-1516035069371-29a1b244cc32?q=80&w=800&auto=format&fit=crop" alt="Original Persona" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent"></div>
               <div className="absolute bottom-0 p-10 text-white">
@@ -506,7 +652,7 @@ const AuraFlowLanding = () => {
               </div>
             </div>
 
-            <div className="group relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-4 md:mt-10">
+            <div className="group relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-4 md:mt-10" style={{ transform: 'translateZ(60px)', transformStyle: 'preserve-3d' }}>
               <img src="/trans.png" alt="Language Flow" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-violet-900/90 via-violet-900/20 to-transparent"></div>
               <div className="absolute bottom-0 p-10 text-white">
@@ -516,7 +662,7 @@ const AuraFlowLanding = () => {
               </div>
             </div>
 
-            <div className="group relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-4">
+            <div className="group relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl transition-all hover:-translate-y-4" style={{ transform: 'translateZ(30px)', transformStyle: 'preserve-3d' }}>
               <img src="/audi.png" alt="Global Reach" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/90 via-cyan-900/20 to-transparent"></div>
               <div className="absolute bottom-0 p-10 text-white">
@@ -543,8 +689,12 @@ const AuraFlowLanding = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 glass-panel p-10 rounded-[3rem] relative overflow-hidden group transition-all animate-on-scroll opacity-0 translate-y-10">
+          <div 
+            ref={bentoRef}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6 transition-transform duration-500 ease-out"
+            style={{ perspective: '2000px', transform: `perspective(2000px) rotateX(${bentoScroll.rotateX}deg) rotateY(${bentoScroll.rotateY}deg) scale(${bentoScroll.scale})`, transformStyle: 'preserve-3d' }}
+          >
+            <div className="md:col-span-2 glass-panel p-10 rounded-[3rem] relative overflow-hidden group transition-all animate-on-scroll opacity-0 translate-y-10" style={{ transform: 'translateZ(50px)', transformStyle: 'preserve-3d' }}>
               <div className="relative z-10 space-y-6">
                 <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl">
                   <span className="material-symbols-outlined text-3xl">radio_button_unchecked</span>
@@ -557,25 +707,25 @@ const AuraFlowLanding = () => {
               </div>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10">
+            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10" style={{ transform: 'translateZ(30px)', transformStyle: 'preserve-3d' }}>
               <span className="material-symbols-outlined text-4xl text-cyan-500 mb-6">subtitles</span>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-4">Smart Subtitles</h3>
               <p className="text-slate-500">Subtitles are not just translated; they are natively localized to fit the rhythm and cadence of the speech.</p>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10">
+            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10" style={{ transform: 'translateZ(20px)', transformStyle: 'preserve-3d' }}>
               <span className="material-symbols-outlined text-4xl text-violet-500 mb-6">bolt</span>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-4">Lightning Rendering</h3>
               <p className="text-slate-500">Our cloud processing handles 4K videos in minutes, not hours. Perfect for short-form creators on a schedule.</p>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10">
+            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
               <span className="material-symbols-outlined text-4xl text-amber-500 mb-6">check_circle</span>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-4">Lip-Sync Ready</h3>
               <p className="text-slate-500">Experimental lip-sync coming soon to perfectly match your translated speech with facial movements.</p>
             </div>
 
-            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10">
+            <div className="glass-panel p-10 rounded-[3rem] group hover:bg-white transition-all animate-on-scroll opacity-0 translate-y-10" style={{ transform: 'translateZ(35px)', transformStyle: 'preserve-3d' }}>
               <span className="material-symbols-outlined text-4xl text-emerald-500 mb-6">auto_awesome_motion</span>
               <h3 className="text-2xl font-extrabold text-slate-900 mb-4">Multi-Format Export</h3>
               <p className="text-slate-500">Directly export for TikTok, Reels, or Shorts with pre-formatted aspect ratios and burnt-in captions.</p>
@@ -593,9 +743,13 @@ const AuraFlowLanding = () => {
             <p className="text-slate-500 text-lg">AuraFlow scales your personality across borders.</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div 
+            ref={whoRef}
+            className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 transition-transform duration-500 ease-out"
+            style={{ perspective: '2000px', transform: `perspective(2000px) rotateX(${whoScroll.rotateX}deg) rotateY(${whoScroll.rotateY}deg) scale(${whoScroll.scale})`, transformStyle: 'preserve-3d' }}
+          >
             {/* YouTubers */}
-            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12">
+            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transform: 'translateZ(40px)', transformStyle: 'preserve-3d' }}>
               <img src="/y1.png" alt="YouTubers" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               <div className="absolute bottom-0 left-0 p-8 text-white space-y-2">
@@ -605,7 +759,7 @@ const AuraFlowLanding = () => {
             </div>
 
             {/* Influencers */}
-            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transitionDelay: '100ms' }}>
+            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transitionDelay: '100ms', transform: 'translateZ(60px)', transformStyle: 'preserve-3d' }}>
               <img src="/in.png" alt="Influencers" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               <div className="absolute bottom-0 left-0 p-8 text-white space-y-2">
@@ -615,7 +769,7 @@ const AuraFlowLanding = () => {
             </div>
 
             {/* Educators */}
-            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transitionDelay: '200ms' }}>
+            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transitionDelay: '200ms', transform: 'translateZ(50px)', transformStyle: 'preserve-3d' }}>
               <img src="/edu.png" alt="Educators" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               <div className="absolute bottom-0 left-0 p-8 text-white space-y-2">
@@ -625,7 +779,7 @@ const AuraFlowLanding = () => {
             </div>
 
             {/* Global Brands */}
-            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transitionDelay: '300ms' }}>
+            <div className="group relative overflow-hidden rounded-[2rem] h-[400px] shadow-lg animate-on-scroll opacity-0 translate-y-12" style={{ transitionDelay: '300ms', transform: 'translateZ(35px)', transformStyle: 'preserve-3d' }}>
               <img src="/bis.png" alt="Global Brands" className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
               <div className="absolute bottom-0 left-0 p-8 text-white space-y-2">
