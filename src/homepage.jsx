@@ -129,9 +129,6 @@ const AuraFlowLanding = () => {
     <div className={`selection:bg-indigo-100 selection:text-indigo-900 font-['Plus_Jakarta_Sans',_sans-serif] overflow-x-hidden transition-colors duration-300 ${isDark ? 'bg-[#161616] text-[#f4f4f4] dark' : 'bg-white text-slate-900'}`}>
       {/* Custom Styles for Glassmorphism and Animations */}
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0');
-
         .glass-panel {
           background: rgba(255, 255, 255, 0.6);
           backdrop-filter: blur(20px);
@@ -364,16 +361,16 @@ const AuraFlowLanding = () => {
           <div className="glass-panel px-1.5 py-1.5 rounded-full transition-all duration-1000 opacity-100 translate-y-0 flex items-center gap-2">
             <button
               onClick={toggleTheme}
-              className="relative w-14 h-9 rounded-full bg-slate-200 dark:bg-slate-800 transition-colors duration-300 flex items-center px-1 border border-slate-300 dark:border-slate-600 hover:border-indigo-500/50 focus:outline-none"
+              className="relative w-14 h-9 rounded-full bg-slate-200 dark:bg-slate-800 transition-colors duration-300 flex items-center px-1 border border-slate-300 dark:border-slate-600 hover:border-indigo-500/50 focus:outline-none overflow-hidden"
               aria-label="Toggle Theme"
             >
               <div
-                className={`absolute w-7 h-7 rounded-full bg-white dark:bg-[#020617] shadow-sm flex items-center justify-center transition-transform duration-300 ${isDark ? 'translate-x-[20px]' : 'translate-x-0'}`}
+                className={`absolute w-7 h-7 rounded-full bg-white dark:bg-[#020617] shadow-sm flex items-center justify-center transition-transform duration-300 overflow-hidden ${isDark ? 'translate-x-[20px]' : 'translate-x-0'}`}
               >
-                <span className={`material-symbols-outlined text-[16px] transition-opacity duration-300 ${isDark ? 'text-indigo-400 opacity-100' : 'opacity-0 absolute'}`}>
+                <span className={`material-symbols-outlined text-[16px] absolute transition-all duration-300 ${isDark ? 'text-indigo-400 opacity-100 rotate-0 scale-100' : 'opacity-0 -rotate-90 scale-50'}`}>
                   dark_mode
                 </span>
-                <span className={`material-symbols-outlined text-[16px] text-amber-500 transition-opacity duration-300 ${isDark ? 'opacity-0 absolute' : 'opacity-100'}`}>
+                <span className={`material-symbols-outlined text-[16px] absolute text-amber-500 transition-all duration-300 ${isDark ? 'opacity-0 rotate-90 scale-50' : 'opacity-100 rotate-0 scale-100'}`}>
                   light_mode
                 </span>
               </div>
